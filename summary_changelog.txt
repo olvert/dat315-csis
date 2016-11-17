@@ -1,0 +1,6 @@
+# 2016-11-17 – step 2
+
+  * Corrected minor spelling mistakes
+  * Cited the two papers by Hughes explicitly
+  * Added reference to Olukotun at the end of the introduction
+  * Modified the introduction slightly with some additional sentences
