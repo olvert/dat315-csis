@@ -1,0 +1,50 @@
+%% This is annot.tex.
+%% 
+%% You'll need to change the title and author fields to reflect your
+%% information.
+%%
+%% Author: Titus Barik (titus@barik.net)
+%% Homepage: http://www.barik.net/sw/ieee/
+%% Reference: http://www.ctan.org/tex-archive/info/simplified-latex/
+
+\documentclass [11pt]{article}
+
+\title{Semantics of JavaScript and a verified compiler from FP to JavaScript}
+\author{Olle Svensson (ollesv@student.chalmers.se) \\
+		Chalmers University of Technology \\ \\
+		Completed relevant courses: Functional programming, \\
+		Programming Language Technology, Logic in Computer Science \\ \\
+		Keywords: Formal Methods, Functional Programming, Semantics, \\
+		Compilers, Verification}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Functional programming has had a steady increase in popularity in most recent years. New functional languages have emerged e.g. Haskell and Erlang while many existing imperative languages e.g. Java, C++ and Python have adopted functional features such as lambda expressions \cite{how}. However, the most widely used functional language is neither of the languages mentioned above, but JavaScript. JavaScript is the world's most ubiquitous functional programming language. It is also a strange language with peculiar semantics. The purpose of this thesis is to explore the exact operational semantics of JavaScript and develop a trustworthy compiler from a simple but standard functional language to JavaScript. The intention is to develop a compiler that is as trustworthy as possible, even proved correct to some extent if time allows.
+
+\section{Context}
+The first implementation of JavaScript was released by Netscape in 1996 with Microsoft releasing their own version shortly after. However, both implementations had been developed without any mutual specification. Netscape realised creating a standard would be a necessity since having JavaScript-code that runs on some browsers but not on others is not ideal. This led to the ECMAScript standard, where version 3 and 5 are supported by all major browsers and version 6 and 7 are under development. Even with a standard in place, JavaScript is still a very complex language in its current state. It may not come as a surprise that the 250-page document describing the standard contains elements that are unclear or ambiguous and in some cases even inconsistent. This has led to a range of projects where the operational semantics in JavaScript have been specified in various ways e.g. using the Coq proof assistant or the K framework \cite{coq, kframe}. However these specifications are hard to understand without a good knowledge of the tools in use. The goal of this thesis is to cover the operational semantics of JavaScript in such a way that a person with knowledge in a language like Haskell could understand it.
+
+\section{Goals and Challenges}
+One goal is to cover the operational semantics of JavaScript in a way that makes it understandable to a wider audience than other specifications. In addition, to put it into practice, the specification will be used to develop a compiler from the language CakeML to JavaScript. A second goal is to make this compiler as trustworthy and correct as possible. One significant challenge while developing the specification will be how to handle the cases where the official ECMAScript-documentation is unclear and where different browsers and JavaScript-engines produce different results.
+ 
+\section{Approach}
+The specification will be developed in small incremental steps starting with a small segment of the language. When it has been specified, support for the segment will be added to the compiler and thoroughly tested using tools like QuickCheck. These steps will be repeated until the whole language is covered and the compiler is complete. The scope of this thesis will not include proving and verifying the compiler in its whole. However, we will do this for a small portion of the language. This procedure could then be completed at a later stage or in a different project.
+\nocite{*}
+\begin{thebibliography}{1}
+
+\bibitem{how}
+Z. Hu et al., "How Functional Programming Mattered," in National Science Review, vol. 2, no. 3, pp. 349-367, July 2015.	
+
+\bibitem{coq}
+P. Gardner et al., "A Trusted Mechanised JavaScript Specification," in POPL ’14, pp. 87-100, January 2014.	
+
+\bibitem{kframe}
+D. Park et al., "KJS: A Complete Formal Semantics of JavaScript," in PLDI '15, pp. 346-356, June 2015.	
+
+\end{thebibliography}
+
+
+
+\end{document}

@@ -311,6 +311,8 @@
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
 
+\usepackage{listings}
+
 
 \begin{document}
 %
@@ -391,7 +393,7 @@ The abstract goes here.
 \section{Introduction}
 % no \IEEEPARstart% You must have at least 2 lines in the paragraph with the drop letter
 % (should never be an issue)
-The purpose of this paper is to argue why functional programming will continue to increase in popularity in the coming years and why its benefits will become even more significant. A functional language differs from conventional imperative languages like C++ or Java in that it consists solely of functions. A program is a function that receives arguments as its input and returns a result as the output. The program itself consists of even more functions that eventually reaches the lowest level of primitive types. Further, variables are immutable meaning that once given a value, it can never change. As a result, a functional language has no assignment statements. A functional language also does not have any side-effects. In other words, a function call cannot affect another part of the program during its execution and given a specific input, a function will always return the same value.\cite{why}.
+The purpose of this paper is to argue why functional programming will continue to increase in popularity in the coming years and why its benefits will become even more significant. A functional language differs from conventional imperative languages like C++ or Java in that it consists solely of functions. A program is a function that receives arguments as its input and returns a result as the output. The program itself consists of even more functions that eventually reaches the lowest level of primitive types. Further, variables are immutable meaning that once given a value, it can never change. As a result, a functional language has no assignment statements. A functional language also does not have any side-effects. In other words, a function call cannot affect another part of the program during its execution and given a specific input, a function will always return the same value \cite{why}.
 
 In 1989 Hughes published a paper with the title "Why Functional Programming Matters". In the paper, Hughes describes the significance and advantages of functional programming. He argues that a well-written program is a structured program. To ensure that this is achieved, the program should have a modular design. In turn, modular design is achieved by dividing the main problem into multiple smaller programs that solves subproblems. We call these smaller programs modules. The ability to create a well-written program consisting of multiple modules depends on the features a language offers to glue these modules together. Hughes proves his point by showing a few key features in functional languages that provide this kind of glue. One of these will be discussed in more detail in a following section, namely higher-order functions \cite{why}.
 
@@ -399,16 +401,97 @@ In 2015, Hughes revisited the topic together with Hu and Wang in a paper entitle
 
 
 \section{Higher-Order Functions}
-Text about higher order functions goes here.
+What differentiates higher-order functions from other functions is that they either take one or more functions as argument or that they return a function. They may also do both. We will look at a few examples from Hughes first paper to illustrate how these functions operate and to understand why Hughes considers them as a key feature of functional languages. We will use Haskell as our example language and since we will be working with lists we need to look at the definition of lists in Haskell:
+\begin{lstlisting}[]
+data List a = Nil | Cons a (List a)	
+\end{lstlisting}
+What the snippet above tells us is that a list of any arbitrary type $a$ is either $Nil$, meaning empty, or an element of type $a$ together with another list of type $a$. From an imperative perspective, one could say that the definition resembles a linked list in the sense that an element has a value and reference to the next value. Without going into detail of its meaning we will refer to this second case as $Cons$. We can define a list of three integers as
+
+\begin{lstlisting}[]
+listA = Cons 1 (Cons 2 (Cons 3 Nil))
+\end{lstlisting}
+but since this notation becomes cumbersome rather quickly we will use the more common notation of the elements within brackets separated by commas,
+
+\begin{lstlisting}[]
+listB     = [1,2,3]
+listEmpty = []
+
+\end{lstlisting}
+which is also supported. 
+
+Now that we have introduced lists we can move forward to defining functions. We define a recursive function $sum$ that sums a list of integers. Since a list can be both $Nil$ and $Cons$ we need to have a definition for both cases.
+
+\begin{lstlisting}[]
+sum []     = 0
+sum (n:ns) = n + sum ns
+\end{lstlisting}
+Above we see an additional notation for lists. In the definition for $Cons$ there are two variables separated by a colon. With this notation the $n$ refers to the element or value and $ns$ refers to the rest of the list. To clarify our definition, the sum of an empty list is zero and otherwise the addition of the current element together with the sum of the rest of the list.
+
+We define another function similar to $sum$ which computes the product instead. We define it as
+
+\begin{lstlisting}[]
+product []     = 1
+product (n:ns) = n * product ns
+\end{lstlisting}
+When comparing the two functions we realise that the only difference between them is the value for the base case with an empty list and the binary operator for the general case. Following Hughes philosophy these two functions should be modularised into one general function solving both cases. Indeed there is such a function and it is called $foldr$. This also our first example of a higher-order function. The function $foldr$ takes a function, a starting value and a list and reduces the list into a single value by applying the function to each element together with the intermediate result. We can now define our previous functions in the following way 
+
+\begin{lstlisting}[]
+sum 	= foldr (+) 0
+product = foldr (*) 1
+\end{lstlisting}
+The $foldr$-function takes three arguments but in our new definitions it is only given two. Further, neither $sum$ or $product$ takes the missing list as argument. The reason why this is possible is since $foldr$ is only given two arguments, Haskell automatically recognises $sum$ and $product$ as functions that takes a list as argument. The list is also passed to $foldr$ without having to define it explicitly. 
+
+Another example where $foldr$ can be applied are lists of booleans
+
+\begin{lstlisting}[mathescape=true]
+anytrue = foldr ($\vee$) False
+alltrue = foldr ($\wedge$) True
+\end{lstlisting}
+or computing the length of a list together with a small helper-function
+\begin{lstlisting}[mathescape=true]
+length 		= foldr count 0
+count a n 	= n + 1
+\end{lstlisting}
+The helper-function $count$ will be called for each element in the list. It receives the current element and count in the variables $a$ and $n$. Since the actual value of the element is irrelevant $count$ simply ignores it and increments the current count with one. Since the starting value is zero and $count$ is called for each element in the list, the final result will be the length of the list.
+
+Another example of a higher-order function is $map$ which takes a function and a list, applies the function to each element in the list and returns a list of the results. We could write a function that sums all elements in matrices as
+\begin{lstlisting}[mathescape=true]
+summatrix = sum . map sum
+\end{lstlisting}
+The function uses $map$ to apply $sum$ to each row and computes the total sum with the leftmost $sum$ \cite{why}.
+
+The examples in this section are trivial and one could refer to Hughes original papers for more advanced examples. However, the main point has been to show how general patterns can be implemented as higher-order functions and how these can be combined with simple functions to create more complex functions. By this, we achieve the modularity and the powerful glue that we agreed is an important feature of a good programming language.
 
 \section{Influence}
-Text about how functional programming has influenced other languages and its use in industry goes here.
+Today, functional languages have a widespread use in industry and many imperative languages have adopted features usually considered properties of functional languages. In fact, it is not unlikely many developers are implementing solutions using functional features without them realising it or having any knowledge of functional programming.
+
+Starting with functional influence on other languages, lambda expression are supported in the latest versions of both C\# and C++. Type inference is also a part of C\#'s design. The generic type system introduced in Java 5 was inspired by the type system found in the functional language ML. Support was extended in Java 8 including lambda expressions and higher-order functions. Functional features are often found in multi-paradigm languages as well. The founder of Ruby admits having Lisp, a family of functional languages, as inspiration when creating Ruby. Both lambda expressions and list comprehensions are supported in Python. Further, the Python standard library offers many functions imported from Haskell and Standard ML.
+
+One could say that functional programming already has a widespread use in industry by its existence in the languages already mentioned since they constitutes some of the most popular and widely used languages in the software industry. One example is the functional Java-library RxJava which is heavily used in the Netflix API. But there are also occurrences of purely functional languages. Facebook's system for filtering spam is written in Haskell. According to themselves it is the largest Haskell deployment in existence. Erlang, initially developed by Ericsson, is the language behind enterprises like Klarna AB and WhatsApp. Klarna AB offers invoice services for web shops in seven European countries and WhatsApp, a messaging application, was bought by Facebook in 2014 for a staggering 22 billion dollars \cite{how}.
 
 \section{Evolution of microprocessors}
-Text about why microprocessors are progressing towards multiple cores and what it means for people writing software goes here.
+
+Since 1965 up until recently, the performance of microprocessors has been progressing according to Moore's law. This law was coined by the co-founder of Intel, Gordon Moore, who predicted that the number of components per integrated circuit would double every year for at least a decade. While the performance has increased in magnitudes, the structural architecture of microprocessors has received very few changes. This has been purposely avoided since the economic value of backwards compatibility is so strong. As a result, the architecture has consistently kept the form of a single processor executing a sequential stream of instructions with a large block of memory containing all data, at least in abstraction to software developers.
+
+To increase the performance of microprocessors beyond Moore's law, with the restrictions regarding architecture, development has been focused on two different areas. One has been to enable the execution of multiple instructions in parallel and the other to increase clock frequency. To accommodate the first, superscalar processors were developed that could dynamically examine the sequential stream of instructions and rearrange them so that part of them could be executed in parallel. For example, if an instruction $i_{1}$ was being executed and it shared a number of logical steps with the following instruction $i_{2}$, these logical steps could be executed in parallel. In other words, the execution of $i_{2}$ could start before the execution of $i_{1}$ had finished. Obviously, these actions had to be performed without breaking the logic of the original program.
+
+The use of superscalar processors was facilitated further by introducing the concept of pipelining. Existing instructions were sliced into smaller logical steps to reach a higher level of parallelism. An instruction that needed a few cycles to execute in 1980 might use 20 or more cycles in todays modern processors. Furthermore, since smaller logical steps meant less logic had to change in each cycle, the clock frequency could also be increased almost proportionally to the increase in cycles.
+
+Focus on superscalar processors, pipelining and clock frequency has been successful since it has been possible to develop these areas without affecting developers and their approach in writing software. Unfortunately, this success has come to an end since there are limits in how much a certain area can evolve. Creating superscalar processors with support of executing more than four instructions in parallel provides a performance increase that is insignificant. Further, pipelining instructions into more than 30 steps would mean slicing the current minimal steps, such as adding two integers, into even smaller steps. This would add a significant increase in complexity that would not be justified in comparison to the performance gained. Finally, the improvement of clock frequency has reached its limit in form of power usage. The development has moved from processors in 1980 that used one watt without the need of a heat sink to modern processors using 100 watt with one or more dedicated fans to increase the airflow over the processor. If the power usage were to increase any further, fans would no longer be sufficient. The heat sinks needed in this case e.g. water cooling would be economically justifiable in very few systems.
+
+Kunle Olukotun and Lance Hammond states in a paper called "The Future of Microprocessors" that there are only three dimensions in which processor performance can be increased beyond Moore's law, namely clock frequency, superscalar processors with pipelining and multiprocessing. Since the two first have reached their limit, there is only multiprocessing left to explore. This means that for the first time in roughly 40 years, software developers will have to adjust their approach in writing software if they want to be able to utilise the full potential of coming generations of multiprocessors \cite{proc}.
 
 \section{Concurrency}
-Text about concurrency in functional languages with Erlang as example goes here.
+
+This section intends to give a brief comparison of concurrent programming in functional versus imperative languages. It will do so by referring to a paper by Steve Vinoski called "Concurrency in Erlang". Vinoski claims that writing correct multithreaded applications is beyond many developers technical abilities. The primary reason is that many imperative languages like Java and C++ uses a global state that is shared between threads. Access to this shared state must be handled carefully. Multiple threads allowed to perform read and write operations simultaneously can lead to corrupt data which in turn can lead to program instability. Needless to say, the risks of utilising multiple threads together with a shared state are well known and there are a variety of mechanisms for handling this e.g. using locks and semaphores. However, applying these mechanisms in a correct way is a non-trivial procedure. Using semaphores or locks on too large blocks of code will lead to poor performance and the behaviour of a single-threaded application since a majority of the code can only be accessed by one thread at a time. Making the blocks to small on the other hand greatly increases the risk of deadlocks by threads acquiring locks in different order.
+
+To avoid this, one option is to leave the responsibility to a framework that either offer a correct way to serialise access to a shared state or by avoiding a shared state altogether. Though avoiding state altogether might mean skewing the language in a way it was not intentionally meant to be used, and the suitability of such a solution could be questioned. Further, avoiding state also requires great discipline from the developer since neither the framework or the language itself can prevent the developers from accidentally introducing their own errors anyway. Vinoski suggests that a perhaps better solution would be to use a language specifically design to not use the concept of state, which leads us to functional language Erlang.
+
+Erlang was initially developed at Ericsson to create a highly concurrent, fault tolerant and reliable language for their telecommunications switches. It also has an important functional feature in the form of immutable objects. Unlike Java or C++, the value of a variable in Erlang cannot change once it has been initialised. Instead of updating values through assignment statements, the equality operator in Erlang either initialises a variable or it becomes a boolean expression. If the variable on the left-hand side is unbound, it will receive the value on the right-hand side. If the left-hand variable is already initialised the boolean expression will return true if both values are equal and false otherwise.
+
+What makes immutable objects a powerful feature is that there is no longer any need to worry about read and write operations occurring simultaneously. Since values are immutable they do not need concurrency protection. Further, since Erlang was design to be highly concurrent, its threads or processes are very lightweight. Vinoski conducted a simple test where Erlang was able to launch one million processes in 0.51 seconds. In comparison, C++ on the same machine was able to create 7,044 threads in 1.3 seconds before returning an error due to lack of resources. The test was extended to Java 5 as well which created 431,430 threads in 83.3 seconds before running out of resources \cite{con}.
+
+Finally, it should be noted that the only functional language mentioned in this section is Erlang, but the benefits of e.g. immutable objects applies to functional languages in general.
 
 %\subsection{Subsection Heading Here}
 %Subsection text here.
@@ -516,7 +599,10 @@ Text about concurrency in functional languages with Erlang as example goes here.
 
 
 \section{Conclusion}
-The conclusion goes here.
+
+This paper has introduced the concept of higher-order functions in functional languages. Further, it has shown that this concept has been adopted by many of the most prominent imperative languages currently in use. Functional languages have gone from being used mainly for teaching purposes to being used by enterprises such as Facebook. At same time, the development of microprocessors has reached a point where it can only continue in one direction, namely multiprocessing. As a consequence, software developers will be forced to write software with concurrency support to be able to utilise the full potential of coming generations of processors. In turn, concurrency happens to be an area where imperative languages struggle and where functional languages excel.
+
+What the sentences above tells us is that functional programming has evolved in an incredible way in 25 years and that it might come to play an even bigger role in software development in the next 25 years.
 
 
 
