@@ -9,6 +9,8 @@
 
 \documentclass [11pt]{article}
 
+\usepackage[ligature, inference]{semantic}
+
 \title{Semantics of JavaScript and a verified compiler from FP to JavaScript}
 \author{Olle Svensson (ollesv@student.chalmers.se) \\
 		Chalmers University of Technology \\ \\
@@ -21,16 +23,34 @@
 \maketitle
 
 \section{Introduction}
-Functional programming has had a steady increase in popularity in most recent years. New functional languages have emerged e.g. Haskell and Erlang while many existing imperative languages e.g. Java, C++ and Python have adopted functional features such as lambda expressions \cite{how}. However, the most widely used functional language is neither of the languages mentioned above, but JavaScript. JavaScript is the world's most ubiquitous functional programming language. It is also a strange language with peculiar semantics. The purpose of this thesis is to explore the exact operational semantics of JavaScript and develop a trustworthy compiler from a simple but standard functional language to JavaScript. The intention is to develop a compiler that is as trustworthy as possible, even proved correct to some extent if time allows.
+Functional programming has had a steady increase in popularity in most recent years. New functional languages have emerged e.g. Haskell and Erlang while many existing imperative languages e.g. Java, C++ and Python have adopted functional features such as lambda expressions \cite{how}. However, the most widely used functional language is neither of the languages mentioned above, but JavaScript. JavaScript is the world's most ubiquitous functional programming language. It is also a strange language with peculiar semantics. 
+
+The specification, a formal document defining the syntax and semantics of the language, has increased in complexity over the years. As a result, ambiguities have appeared in the specification which has led to deviations in existing interpreters. In other words, there are cases where given the same input, different interpreters will produce different results. One possible way to circumvent this is to write logic in a different language which is then compiled to JavaScript at a later stage. Preferably, the source language is stricter and more strongly typed which makes it easier to detect errors at compile time rather than run time. In turn, responsibility for not producing JavaScript-code with ambiguities could be shifted to the compiler.
+
+To make this kind of approach a viable solution, it is important that the compiler is as trustworthy as possible. The benefit of higher correctness in a stricter source language is lost if it cannot be ensured that the compiler will compile semantically equivalent JavaScript-code. Thorough testing is one way to ensure that the compiler is correct to a high extent. However, by its nature, testing cannot ensure absence of errors, it can only show the existence of them. To prove the correctness of a compiler, it would need to be verified, which is a more complicated procedure.
 
 \section{Context}
-The first implementation of JavaScript was released by Netscape in 1996 with Microsoft releasing their own version shortly after. However, both implementations had been developed without any mutual specification. Netscape realised creating a standard would be a necessity since having JavaScript-code that runs on some browsers but not on others is not ideal. This led to the ECMAScript standard, where version 3 and 5 are supported by all major browsers and version 6 and 7 are under development. Even with a standard in place, JavaScript is still a very complex language in its current state. It may not come as a surprise that the 250-page document describing the standard contains elements that are unclear or ambiguous and in some cases even inconsistent. This has led to a range of projects where the operational semantics in JavaScript have been specified in various ways e.g. using the Coq proof assistant or the K framework \cite{coq, kframe}. However these specifications are hard to understand without a good knowledge of the tools in use. The goal of this thesis is to cover the operational semantics of JavaScript in such a way that a person with knowledge in a language like Haskell could understand it.
+The first implementation of JavaScript was released by Netscape in 1996 with Microsoft releasing their own version shortly after. However, both implementations had been developed without any mutual specification meaning there was no formal definition of the syntax and semantics of the language or how it should be interpreted. Netscape realised creating a standard would be a necessity since having JavaScript-code that runs on some browsers but not on others is not ideal. This led to the ECMAScript standard, where version 3 and 5 are supported by all major browsers and version 6 and 7 are under development. Even with a standard in place, JavaScript is still a very complex language in its current state. It may not come as a surprise that the 250-page document describing the standard contains elements that are unclear or ambiguous and in some cases even inconsistent. This has led to a range of projects where the operational semantics in JavaScript have been specified in various ways e.g. using the Coq proof assistant or the K framework \cite{coq, kframe}. However these specifications are hard to understand without a good knowledge of the tools in use. The goal of this project is to cover the operational semantics of JavaScript in such a way that a person with knowledge in a language like Haskell could understand it.
 
 \section{Goals and Challenges}
-One goal is to cover the operational semantics of JavaScript in a way that makes it understandable to a wider audience than other specifications. In addition, to put it into practice, the specification will be used to develop a compiler from the language CakeML to JavaScript. A second goal is to make this compiler as trustworthy and correct as possible. One significant challenge while developing the specification will be how to handle the cases where the official ECMAScript-documentation is unclear and where different browsers and JavaScript-engines produce different results.
+One goal is to cover the operational semantics of JavaScript in a way that makes it understandable to a wider audience than other specifications. The semantics will be specified using big-step semantics, which in comparison to small-step semantics describes the result of an evaluation instead of each step in it. 
+
+\newpage
+
+For example, to specify the result of evaluating an expression one would write
+\[ \gamma \Rightarrow e \Downarrow v \]
+where $\gamma$ is the environment in which the expression $e$ is evaluated and where $v$ is the result of that evaluation. Another example of specifying the resulting type of an expression is
+\[ 
+\inference[] {
+\Gamma \Rightarrow a : bool \quad \Gamma \Rightarrow b : bool 
+}{\Gamma \Rightarrow a\&\&b : bool}
+\]
+which tells us given that $a$ and $b$ are of type $bool$, the result of a logical and-operation between them will be of type $bool$ as well.
+
+In addition, to put it into practice, the specification will be used to develop a compiler from the language CakeML to JavaScript. A second goal is to make this compiler as trustworthy and correct as possible. One significant challenge while developing the specification will be how to handle the cases where the official ECMAScript-documentation is unclear and where different browsers and JavaScript-engines produce different results.
  
 \section{Approach}
-The specification will be developed in small incremental steps starting with a small segment of the language. When it has been specified, support for the segment will be added to the compiler and thoroughly tested using tools like QuickCheck. These steps will be repeated until the whole language is covered and the compiler is complete. The scope of this thesis will not include proving and verifying the compiler in its whole. However, we will do this for a small portion of the language. This procedure could then be completed at a later stage or in a different project.
+The specification will be developed in small incremental steps starting with a small segment of the language. When it has been specified, support for the segment will be added to the compiler and thoroughly tested using tools like QuickCheck. These steps will be repeated until the whole language is covered and the compiler is complete. The scope of this project will not include proving and verifying the compiler in its whole. However, we will do this for a small portion of the language. This procedure could then be completed at a later stage or in a different project.
 \nocite{*}
 \begin{thebibliography}{1}
 
@@ -45,6 +65,18 @@ D. Park et al., "KJS: A Complete Formal Semantics of JavaScript," in PLDI '15, p
 
 \end{thebibliography}
 
+\appendix
+\section{Ethics}
+The purpose of the project described in this paper is to produce a specification of the operational semantics of JavaScript which aims to be more readable for the average JavaScript developer compared to other existing specifications. A secondary goal is to implement a compiler with the aim of offering a way of producing JavaScript-code with a higher degree of correctness. At first glance, there seems to be no apparent risks of producing the specification or the compiler. Are there any possible reasons to why one would refrain from producing one or both of them?
 
+One possible reason, which applies to many cases in general, is skill degradation. One could claim that the practice of abstracting a lower-level language to another high-level language always includes the risk of skill degradation. In our context, this means abstracting JavaScript to CakeML and compiling the CakeML implementation into a correct corresponding JavaScript implementation. The solution would offer developers to avoid the peculiarity of JavaScript in many cases. On the other hand, it might make their ability to handle these peculiarities worse if they are at some point forced to do so. Again, this is in no way an issue limited to this particular case, but an issue in general.
+
+Another argument could be that if a language has peculiarities that makes it hard to write correct applications in it, it should be replaced with a more suitable language. Let us assume this is the case and the goal is to replace JavaScript with another language. One could argue that by offering solutions to circumvent the peculiarities in JavaScript, one is also impeding the goal of replacing it.
+
+Further, let us assume that JavaScript needs to be replaced at some point in the future, but it is unclear exactly when. Up until this point in time, offering an abstraction to a different language would be beneficial to the developer community. But afterwards, one should refrain from introducing new solutions of this kind to encourage the community to move towards the new language instead. How would one determine when this point in time has been reached? It seems unlikely that there would be a definitive answer to this question.
+
+From a different perspective, one could also argue that offering new solutions is beneficial as long as there is demand for it. The community should not be forced into using a new language but rather switch to it voluntarily because the benefits of doing so outweighs the benefits of sticking to JavaScript.
+
+Regardless of whether JavaScript will be replaced or not, it is a very well established language at the moment and there is no conceivable replacement in the foreseeable future. If there is a point in time where it should be replaced, it surely is not at this moment.
 
 \end{document}
